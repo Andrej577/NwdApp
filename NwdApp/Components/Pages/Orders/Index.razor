@@ -1,8 +1,11 @@
-﻿@page "/orders"
+﻿@page "/Orders/orders"
+
 @using MudBlazor
 @using NwdApp.Model.POCO.Pages.Orders
+
 @inject DAL.Pages.OrdersPageDAL OrdersPageDAL
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <PageTitle>Orders</PageTitle>
 
@@ -120,6 +123,6 @@
 
     private void AddOrder()
     {
-        Snackbar.Add("New order page not implemented yet.", Severity.Info);
+        Navigation.NavigateTo("/orders/new");
     }
 }
