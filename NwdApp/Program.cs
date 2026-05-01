@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Connections;
 using MudBlazor.Services;
 using NwdApp.Components;
-using NwdApp.DAL;
+using NwdApp.DAL.Dashboard;
 using NwdApp.Model.POCO;
 using NwdApp.Service.Database;
 using NwdApp.Service.SingalR;

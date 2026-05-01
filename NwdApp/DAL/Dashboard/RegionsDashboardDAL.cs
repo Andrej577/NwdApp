@@ -2,7 +2,7 @@
 using NwdApp.Model.POCO;
 using NwdApp.Service.Database;
 
-namespace NwdApp.DAL
+namespace NwdApp.DAL.Dashboard
 {
     public class RegionsDashboardDAL
     {
@@ -18,31 +18,30 @@ namespace NwdApp.DAL
             using var con = _dbConnectionFactory.CreateConnection();
 
             var sql = """
-                WITH Last20000Orders AS
+                WITH AllOrders AS
                 (
-                    SELECT TOP 20000
+                    SELECT 
                         ord.OrderID,
                         ord.EmployeeID,
                         ord.OrderDate
                     FROM Orders ord
                     WHERE ord.OrderDate IS NOT NULL
-                    ORDER BY ord.OrderDate DESC
                 )
                 SELECT
-                    ISNULL(r.RegionDescription, 'Unknown') AS RegionDescription,
+                    ISNULL(RTRIM(r.RegionDescription), 'Unknown') AS RegionDescription,
                     YEAR(lo.OrderDate) AS [Year],
                     MONTH(lo.OrderDate) AS [Month],
                     COUNT(DISTINCT lo.OrderID) AS OrdersCount
-                FROM Last20000Orders lo
+                FROM AllOrders lo
                 LEFT JOIN Employees em ON em.EmployeeID = lo.EmployeeID
                 LEFT JOIN EmployeeTerritories et ON et.EmployeeID = em.EmployeeID
                 LEFT JOIN Territories t ON t.TerritoryID = et.TerritoryID
                 LEFT JOIN Region r ON r.RegionID = t.RegionID
                 GROUP BY
-                    ISNULL(r.RegionDescription, 'Unknown'),
+                    ISNULL(RTRIM(r.RegionDescription), 'Unknown'),
                     YEAR(lo.OrderDate),
                     MONTH(lo.OrderDate)
-                ORDER BY [Year], [Month], RegionDescription
+                ORDER BY [Year], [Month], RegionDescription;
                 """;
 
             return (await con.QueryAsync<RegionsDashboardPOCO>(sql)).ToList();

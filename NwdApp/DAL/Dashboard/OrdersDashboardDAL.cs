@@ -3,7 +3,7 @@ using NwdApp.Model.DTO;
 using NwdApp.Model.POCO;
 using NwdApp.Service.Database;
 
-namespace NwdApp.DAL
+namespace NwdApp.DAL.Dashboard
 {
     public class OrdersDashboardDAL
     {
@@ -19,7 +19,7 @@ namespace NwdApp.DAL
             using var connection = _dbConnectionFactory.CreateConnection();
             
             var sql = """
-            SELECT TOP (20000) cus.ContactName, emp.FirstName + ' ' + emp.LastName as Employee, ord.OrderDate, ord.ShipCountry 
+            SELECT cus.ContactName, emp.FirstName + ' ' + emp.LastName as Employee, ord.OrderDate, ord.ShipCountry 
             FROM Orders ord 
             JOIN Employees emp ON emp.EmployeeID = ord.EmployeeID
             JOIN Customers cus ON cus.CustomerID = ord.CustomerID

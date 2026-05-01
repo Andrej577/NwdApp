@@ -2,7 +2,7 @@
 using NwdApp.Model.POCO;
 using NwdApp.Service.Database;
 
-namespace NwdApp.DAL
+namespace NwdApp.DAL.Dashboard
 {
     public class ShippersDashboardDAL
     {
