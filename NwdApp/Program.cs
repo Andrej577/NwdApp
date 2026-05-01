@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Connections;
+using MudBlazor;
 using MudBlazor.Services;
 using NwdApp.Components;
-using NwdApp.DAL.Dashboard;
-using NwdApp.Model.POCO;
+using NwdApp.DAL.Pages;
+using NwdApp.DAL.Pages.Dashboard;
 using NwdApp.Service.Database;
 using NwdApp.Service.SingalR;
+using NwdApp.Service.Util;
 using NwdApp.Services;
 
 namespace NwdApp
@@ -16,10 +17,10 @@ namespace NwdApp
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+            builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
             builder.Services.AddMudServices();
+            builder.Services.AddScoped<AppThemeState>();
 
             builder.Services.AddScoped<IDBConnectionFactory, DbConnectionFactory>();
 
@@ -29,9 +30,19 @@ namespace NwdApp
             builder.Services.AddScoped<ShippersDashboardDAL>();
             builder.Services.AddScoped<RegionsDashboardDAL>();
 
+            builder.Services.AddScoped<OrdersPageDAL>();
+
             builder.Services.AddSignalR();
             builder.Services.AddHostedService<OrderWatcherService>();
 
+            builder.Services.AddMudServices(config =>
+            {
+                config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+                config.SnackbarConfiguration.PreventDuplicates = true;
+                config.SnackbarConfiguration.NewestOnTop = true;
+                config.SnackbarConfiguration.ShowCloseIcon = true;
+                config.SnackbarConfiguration.VisibleStateDuration = 3000;
+            });
 
             var app = builder.Build();
 
@@ -45,8 +56,7 @@ namespace NwdApp
             app.UseAntiforgery();
 
             app.MapStaticAssets();
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
+            app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
             app.MapHub<DashboardHub>("/dashboardHub");
 

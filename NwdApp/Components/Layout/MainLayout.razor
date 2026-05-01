@@ -1,8 +1,14 @@
 ﻿@inherits LayoutComponentBase
-<MudThemeProvider />
+
+@inject IJSRuntime JS
+@inject NwdApp.Service.Util.AppThemeState ThemeState
+@implements IDisposable
+
+<MudThemeProvider IsDarkMode="@ThemeState.IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -20,3 +26,23 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ThemeState.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var savedDarkMode = await JS.InvokeAsync<bool>("themeStorage.getDarkMode");
+        ThemeState.SetDarkMode(savedDarkMode);
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnChange -= StateHasChanged;
+    }
+}

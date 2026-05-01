@@ -1,0 +1,27 @@
+﻿@page "/settings"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject NwdApp.Service.Util.AppThemeState ThemeState
+
+<PageTitle>Settings</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">Settings</MudText>
+
+<MudPaper Class="pa-4" Elevation="2">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <div>
+            <MudText Typo="Typo.h6">Dark mode</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Switch application theme.</MudText>
+        </div>
+
+        <MudSwitch T="bool" Value="@ThemeState.IsDarkMode" ValueChanged="OnDarkModeChanged" Color="Color.Primary" />
+    </MudStack>
+</MudPaper>
+
+@code {
+    private async Task OnDarkModeChanged(bool value)
+    {
+        ThemeState.SetDarkMode(value);
+        await JS.InvokeVoidAsync("themeStorage.setDarkMode", value);
+    }
+}

@@ -1,0 +1,85 @@
+﻿@page "/orders"
+@using MudBlazor
+@using NwdApp.Model.POCO.Pages.Orders
+@inject DAL.Pages.OrdersPageDAL OrdersPageDAL
+@inject ISnackbar Snackbar
+
+<PageTitle>Orders</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+    <MudStack Spacing="2" Class="mb-4" AlignItems="AlignItems.Start">
+        <MudText Typo="Typo.h4">Orders</MudText>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AddOrder">
+            New order
+        </MudButton>
+    </MudStack>
+
+    <MudDataGrid T="OrderGridRowPOCO" ServerData="LoadOrders" Dense="false" Hover="true" Bordered="true" Striped="false" RowsPerPage="pagintationNumber">
+        <Columns>
+            <HierarchyColumn T="OrderGridRowPOCO" />
+            <PropertyColumn Property="x => x.OrderDate" Title="Order Date" Format="dd.MM.yyyy." />
+            <PropertyColumn Property="x => x.CustomerName" Title="Customer" />
+            <PropertyColumn Property="x => x.EmployeeName" Title="Employee" />
+            <PropertyColumn Property="x => x.ShipperName" Title="Shipper" />
+            <PropertyColumn Property="x => x.Freight" Title="Freight" Format="N2" />
+        </Columns>
+
+        <ChildRowContent>
+            <MudPaper Class="pa-4 ma-2" Elevation="0">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudPaper Class="pa-3" Elevation="3">
+                            <MudText Typo="Typo.h6" Class="mb-2">Employee</MudText>
+                            <MudText Typo="Typo.body2"><b>Name:</b> @context.Item.EmployeeName</MudText>
+                            <MudText Typo="Typo.body2"><b>Title:</b> @context.Item.Employee?.Title</MudText>
+                            <MudText Typo="Typo.body2"><b>City:</b> @context.Item.Employee?.City</MudText>
+                            <MudText Typo="Typo.body2"><b>Country:</b> @context.Item.Employee?.Country</MudText>
+                        </MudPaper>
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudPaper Class="pa-3" Elevation="3">
+                            <MudText Typo="Typo.h6" Class="mb-2">Customer</MudText>
+                            <MudText Typo="Typo.body2"><b>Company:</b> @context.Item.Customer?.CompanyName</MudText>
+                            <MudText Typo="Typo.body2"><b>Contact:</b> @context.Item.Customer?.ContactName</MudText>
+                            <MudText Typo="Typo.body2"><b>City:</b> @context.Item.Customer?.City</MudText>
+                            <MudText Typo="Typo.body2"><b>Phone:</b> @context.Item.Customer?.Phone</MudText>
+                        </MudPaper>
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudPaper Class="pa-3" Elevation="3">
+                            <MudText Typo="Typo.h6" Class="mb-2">Shipper</MudText>
+                            <MudText Typo="Typo.body2"><b>Company:</b> @context.Item.Shipper?.CompanyName</MudText>
+                            <MudText Typo="Typo.body2"><b>Phone:</b> @context.Item.Shipper?.Phone</MudText>
+                            <MudDivider Class="my-2" />
+                            <MudText Typo="Typo.body2"><b>Ship to:</b> @context.Item.Order.ShipName</MudText>
+                            <MudText Typo="Typo.body2"><b>Address:</b> @context.Item.Order.ShipAddress</MudText>
+                            <MudText Typo="Typo.body2"><b>City:</b> @context.Item.Order.ShipCity</MudText>
+                            <MudText Typo="Typo.body2"><b>Country:</b> @context.Item.Order.ShipCountry</MudText>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </ChildRowContent>
+
+        <PagerContent>
+            <MudDataGridPager T="OrderGridRowPOCO" />
+        </PagerContent>
+    </MudDataGrid>
+</MudContainer>
+
+@code {
+    private int pagintationNumber = 10;
+
+    private Task<GridData<OrderGridRowPOCO>> LoadOrders(GridState<OrderGridRowPOCO> state, CancellationToken cancellationToken)
+    {
+        return OrdersPageDAL.GetOrdersGridPageAsync(state, pagintationNumber, cancellationToken);
+    }
+
+    private void AddOrder()
+    {
+        Snackbar.Add("New order page not implemented yet.", Severity.Info);
+    }
+}

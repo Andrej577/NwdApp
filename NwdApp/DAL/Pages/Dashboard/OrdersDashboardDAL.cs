@@ -1,9 +1,9 @@
 ﻿using Dapper;
 using NwdApp.Model.DTO;
-using NwdApp.Model.POCO;
+using NwdApp.Model.POCO.Pages.Dashboard;
 using NwdApp.Service.Database;
 
-namespace NwdApp.DAL.Dashboard
+namespace NwdApp.DAL.Pages.Dashboard
 {
     public class OrdersDashboardDAL
     {
