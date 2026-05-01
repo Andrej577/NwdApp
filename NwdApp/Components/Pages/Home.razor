@@ -1,0 +1,459 @@
+﻿@page "/"
+
+@using MudBlazor
+@using NwdApp.DAL
+@using NwdApp.Model.DTO
+@using NwdApp.Model.POCO
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject OrdersDashboardDAL _ordersDAL
+@inject EmployeeDashboardDAL _employeesDAL
+@inject ProductDashboardDAL _productsDAL
+@inject ShippersDashboardDAL _shippersDAL
+@inject RegionsDashboardDAL _regionsDAL
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+
+<PageTitle>Northwind Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+
+    <MudText Typo="Typo.h4" Class="mb-4 fw-bold">
+        Northwind
+    </MudText>
+
+    <MudGrid Spacing="3">
+
+        <MudItem xs="12" md="10">
+            <MudGrid Spacing="3">
+
+                <MudItem xs="12" md="4">
+                    <MudPaper Elevation="4" Class="pa-3 rounded-xl" Style="height:100%;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Size="Size.Large" Color="Color.Warning" />
+                            <MudText Typo="Typo.h6" Class="fw-bold">
+                                Top Employees
+                            </MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Highest number of orders
+                        </MudText>
+
+                        @if (_topEmployees is null)
+                        {
+                            <div class="d-flex flex-column justify-center align-center" style="min-height: 140px;">
+                                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                                <MudText Typo="Typo.body2">Loading...</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var employee in _topEmployees)
+                            {
+                                <MudCard Class="mb-2">
+                                    <MudCardContent Class="pa-3">
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body1" Class="fw-semibold">
+                                                    @employee.EmployeeFullName
+                                                </MudText>
+                                                <MudText Typo="Typo.caption">
+                                                    @(string.IsNullOrWhiteSpace(employee.Title) ? "Employee" : employee.Title)
+                                                </MudText>
+                                            </MudStack>
+
+                                            <MudChip T="string"
+                                                     Color="Color.Primary"
+                                                     Variant="Variant.Filled"
+                                                     Size="Size.Small"
+                                                     Text="@employee.OrdersCount.ToString()" />
+                                        </MudStack>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="4">
+                    <MudPaper Elevation="4" Class="pa-3 rounded-xl" Style="height:100%;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Large" Color="Color.Success" />
+                            <MudText Typo="Typo.h6" Class="fw-bold">
+                                Top Products
+                            </MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Highest revenue products
+                        </MudText>
+
+                        @if (_topProducts is null)
+                        {
+                            <div class="d-flex flex-column justify-center align-center" style="min-height: 140px;">
+                                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                                <MudText Typo="Typo.body2">Loading...</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var product in _topProducts)
+                            {
+                                <MudCard Class="mb-2">
+                                    <MudCardContent Class="pa-3">
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                            <MudStack Spacing="0" Style="min-width:0; flex:1;">
+                                                <MudText Typo="Typo.body1" Class="fw-semibold">
+                                                    @TrimText(product.ProductName, 24)
+                                                </MudText>
+                                                <MudText Typo="Typo.caption">
+                                                    Revenue
+                                                </MudText>
+                                            </MudStack>
+
+                                            <MudChip T="string"
+                                                     Color="Color.Success"
+                                                     Variant="Variant.Filled"
+                                                     Size="Size.Small"
+                                                     Text="@product.TotalRevenue.ToString("C0")" />
+                                        </MudStack>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="4">
+                    <MudPaper Elevation="4" Class="pa-3 rounded-xl" Style="height:100%;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Size="Size.Large" Color="Color.Info" />
+                            <MudText Typo="Typo.h6" Class="fw-bold">
+                                Top Shippers
+                            </MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Highest shipped order count
+                        </MudText>
+
+                        @if (_topShippers is null)
+                        {
+                            <div class="d-flex flex-column justify-center align-center" style="min-height: 140px;">
+                                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                                <MudText Typo="Typo.body2">Loading...</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var shipper in _topShippers)
+                            {
+                                <MudCard Class="mb-2">
+                                    <MudCardContent Class="pa-3">
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                            <MudStack Spacing="0" Style="min-width:0; flex:1;">
+                                                <MudText Typo="Typo.body1" Class="fw-semibold">
+                                                    @TrimText(shipper.CompanyName, 22)
+                                                </MudText>
+                                                <MudText Typo="Typo.caption">
+                                                    Shipper
+                                                </MudText>
+                                            </MudStack>
+
+                                            <MudChip T="string"
+                                                     Color="Color.Info"
+                                                     Variant="Variant.Filled"
+                                                     Size="Size.Small"
+                                                     Text="@shipper.OrdersCount.ToString()" />
+                                        </MudStack>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="4" Class="pa-4 rounded-xl" Style="height:100%;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.ShowChart" Size="Size.Large" Color="Color.Primary" />
+                            <MudText Typo="Typo.h6" Class="fw-bold">
+                                Orders Trend
+                            </MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Monthly order volume overview
+                        </MudText>
+
+                        <MudChart T="int"
+                                  ChartType="ChartType.Line"
+                                  ChartSeries="@_ordersChartSeries"
+                                  ChartLabels="@_ordersChartLabels"
+                                  Width="100%"
+                                  Height="300px" />
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="4" Class="pa-4 rounded-xl" Style="height:100%;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Large" Color="Color.Secondary" />
+                            <MudText Typo="Typo.h6" Class="fw-bold">
+                                Regions by Month
+                            </MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Monthly orders by region from last 20000 orders
+                        </MudText>
+
+                        <MudChart T="int"
+                                  ChartType="ChartType.Bar"
+                                  ChartSeries="@_regionsChartSeries"
+                                  ChartLabels="@_regionsChartLabels"
+                                  Width="100%"
+                                  Height="300px" />
+                    </MudPaper>
+                </MudItem>
+
+            </MudGrid>
+        </MudItem>
+
+        <MudItem xs="12" md="2">
+            <MudGrid Spacing="3">
+
+                <MudItem xs="12">
+                    <MudPaper Elevation="0" Class="pa-3 rounded-xl">
+                        <MudPaper Class="pa-3 d-flex flex-column align-center justify-center" Outlined="true">
+                            <MudText Typo="Typo.h5" Class="fw-bold">
+                                @_currentTime.ToString("HH:mm:ss")
+                            </MudText>
+
+                            <MudText Typo="Typo.caption">
+                                @_currentTime.ToString("dd.MM.yyyy.")
+                            </MudText>
+                        </MudPaper>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Elevation="0" Class="pa-3 rounded-xl" Style="height:100%;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-1">
+                            <MudIcon Icon="@Icons.Material.Filled.ReceiptLong" Size="Size.Large" Color="Color.Secondary" />
+                            <MudText Typo="Typo.h6" Class="fw-bold">
+                                Last 6 Orders
+                            </MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            Latest inserted orders
+                        </MudText>
+
+                        @if (_lastOrders is null)
+                        {
+                            <div class="d-flex flex-column justify-center align-center" style="min-height: 220px;">
+                                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" Class="mb-2" />
+                                <MudText Typo="Typo.body2">Loading...</MudText>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var order in _lastOrders)
+                            {
+                                <MudCard Class="mb-2">
+                                    <MudCardContent Class="pa-3">
+                                        <MudStack Spacing="0">
+                                            <MudText Typo="Typo.body2" Class="fw-semibold">
+                                                @TrimText(order.ContactName, 18)
+                                            </MudText>
+
+                                            <MudText Typo="Typo.caption">
+                                                @(order.OrderDate?.ToString("dd.MM HH:mm") ?? "No date")
+                                            </MudText>
+                                        </MudStack>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
+                        }
+                    </MudPaper>
+                </MudItem>
+
+            </MudGrid>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<OrderDTO>? _ordersDTO;
+    private List<OrdersListDahsboardPOCO>? _lastOrders;
+    private List<EmployeesDashboardPOCO>? _topEmployees;
+    private List<ProductDashboardPOCO>? _topProducts;
+    private List<ShippersDashboardPOCO>? _topShippers;
+    private List<RegionsDashboardPOCO>? _numOrdersByRegion;
+
+    private List<ChartSeries<int>> _ordersChartSeries = new();
+    private string[] _ordersChartLabels = [];
+
+    private List<ChartSeries<int>> _regionsChartSeries = new();
+    private string[] _regionsChartLabels = [];
+
+    private DateTime _currentTime = DateTime.Now;
+    private System.Threading.Timer? _clockTimer;
+
+    private HubConnection? _hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ClockInit();
+        await RefreshDashboardWidgetsAsync();
+        await HubConnectionInit();
+    }
+
+    private async Task HubConnectionInit()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/dashboardHub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<int>("OrderInserted", async (orderId) =>
+        {
+            await RefreshDashboardWidgetsAsync();
+
+            await InvokeAsync(() =>
+            {
+                Snackbar.Add($"Dashboard updated. New order: {orderId}", Severity.Info);
+                StateHasChanged();
+            });
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    private async Task RefreshDashboardWidgetsAsync()
+    {
+        _ordersDTO = await _ordersDAL.GetLast20000Orders();
+        _lastOrders = await _ordersDAL.GetLast3Orders();
+        _topEmployees = await _employeesDAL.GetTop3Employees();
+        _topProducts = await _productsDAL.GetTop3ProductsByRevenue();
+        _topShippers = await _shippersDAL.GetTop3Shippers();
+        _numOrdersByRegion = await _regionsDAL.GetOrdersByRegionFrom20000Orders();
+
+        OrdersChartInit();
+        RegionsChartInit();
+    }
+
+    private void ClockInit()
+    {
+        _clockTimer = new System.Threading.Timer(_ =>
+        {
+            _currentTime = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private void OrdersChartInit()
+    {
+        if (_ordersDTO is null)
+            return;
+
+        var grouped = _ordersDTO
+            .Where(x => x.OrderDate.HasValue)
+            .GroupBy(x => new { x.OrderDate!.Value.Year, x.OrderDate!.Value.Month })
+            .Select(g => new
+            {
+                Year = g.Key.Year,
+                Month = g.Key.Month,
+                Count = g.Count()
+            })
+            .OrderBy(x => x.Year)
+            .ThenBy(x => x.Month)
+            .ToList();
+
+        _ordersChartLabels = grouped
+            .Select(x => $"{x.Month:00}.{x.Year}")
+            .ToArray();
+
+        _ordersChartSeries = new List<ChartSeries<int>>
+        {
+            new ChartSeries<int>
+            {
+                Name = "Orders",
+                Data = new ChartData<int>(grouped.Select(x => x.Count).ToList())
+            }
+        };
+    }
+
+    private void RegionsChartInit()
+    {
+        if (_numOrdersByRegion is null || !_numOrdersByRegion.Any())
+            return;
+
+        var monthKeys = _numOrdersByRegion
+            .Select(x => new { x.Year, x.Month })
+            .Distinct()
+            .OrderBy(x => x.Year)
+            .ThenBy(x => x.Month)
+            .ToList();
+
+        _regionsChartLabels = monthKeys
+            .Select(x => $"{x.Month:00}.{x.Year}")
+            .ToArray();
+
+        var regions = _numOrdersByRegion
+            .Select(x => x.RegionDescription)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
+
+        _regionsChartSeries = new List<ChartSeries<int>>();
+
+        foreach (var region in regions)
+        {
+            var values = monthKeys
+                .Select(m =>
+                    _numOrdersByRegion
+                        .Where(x => x.RegionDescription == region && x.Year == m.Year && x.Month == m.Month)
+                        .Select(x => x.OrdersCount)
+                        .FirstOrDefault())
+                .ToList();
+
+            _regionsChartSeries.Add(new ChartSeries<int>
+            {
+                Name = region,
+                Data = new ChartData<int>(values)
+            });
+        }
+    }
+
+    public void Dispose()
+    {
+        _clockTimer?.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _clockTimer?.Dispose();
+
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+    private static string TrimText(string? text, int maxLength = 26)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+
+        return text.Length <= maxLength
+            ? text
+            : text[..maxLength] + "...";
+    }
+}
