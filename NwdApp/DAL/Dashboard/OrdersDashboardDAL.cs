@@ -19,7 +19,7 @@ namespace NwdApp.DAL.Dashboard
             using var connection = _dbConnectionFactory.CreateConnection();
             
             var sql = """
-            SELECT cus.ContactName, emp.FirstName + ' ' + emp.LastName as Employee, ord.OrderDate, ord.ShipCountry 
+            SELECT TOP (20000) cus.ContactName, emp.FirstName + ' ' + emp.LastName as Employee, ord.OrderDate, ord.ShipCountry 
             FROM Orders ord 
             JOIN Employees emp ON emp.EmployeeID = ord.EmployeeID
             JOIN Customers cus ON cus.CustomerID = ord.CustomerID
