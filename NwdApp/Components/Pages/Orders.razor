@@ -18,11 +18,51 @@
     <MudDataGrid T="OrderGridRowPOCO" ServerData="LoadOrders" Dense="false" Hover="true" Bordered="true" Striped="false" RowsPerPage="pagintationNumber">
         <Columns>
             <HierarchyColumn T="OrderGridRowPOCO" />
-            <PropertyColumn Property="x => x.OrderDate" Title="Order Date" Format="dd.MM.yyyy." />
-            <PropertyColumn Property="x => x.CustomerName" Title="Customer" />
-            <PropertyColumn Property="x => x.EmployeeName" Title="Employee" />
-            <PropertyColumn Property="x => x.ShipperName" Title="Shipper" />
-            <PropertyColumn Property="x => x.Freight" Title="Freight" Format="N2" />
+
+            <PropertyColumn Property="x => x.OrderDate" Title="Order Date" Format="dd.MM.yyyy.">
+                <HeaderTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Size="Size.Small" />
+                        <MudText>Order Date</MudText>
+                    </MudStack>
+                </HeaderTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.CustomerName" Title="Customer">
+                <HeaderTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" />
+                        <MudText>Customer</MudText>
+                    </MudStack>
+                </HeaderTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.EmployeeName" Title="Employee">
+                <HeaderTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
+                        <MudText>Employee</MudText>
+                    </MudStack>
+                </HeaderTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.ShipperName" Title="Shipper">
+                <HeaderTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Size="Size.Small" />
+                        <MudText>Shipper</MudText>
+                    </MudStack>
+                </HeaderTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.Freight" Title="Freight" Format="N2">
+                <HeaderTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Small" />
+                        <MudText>Freight</MudText>
+                    </MudStack>
+                </HeaderTemplate>
+            </PropertyColumn>
         </Columns>
 
         <ChildRowContent>
