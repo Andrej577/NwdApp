@@ -1,0 +1,35 @@
+﻿@using NwdApp.Model.DTO
+@inject DAL.Pages.ShippersPageDAL ShippersPageDAL
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudTextField @bind-Value="_shipper.CompanyName" Label="Company name" Required="true" />
+            <MudTextField @bind-Value="_shipper.Phone" Label="Phone" />
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private ShipperDTO _shipper = new();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(_shipper.CompanyName)) return;
+
+        await ShippersPageDAL.InsertShipperAsync(_shipper);
+        MudDialog.Close(DialogResult.Ok(_shipper));
+    }
+}

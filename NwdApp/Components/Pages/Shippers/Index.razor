@@ -1,0 +1,61 @@
+﻿@page "/Shippers/shippers"
+@using NwdApp.Model.DTO
+@inject DAL.Pages.ShippersPageDAL ShippersPageDAL
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Shippers</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+    <MudStack Spacing="2" AlignItems="AlignItems.Start" Class="mb-4">
+        <MudText Typo="Typo.h4">Shippers</MudText>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AddShipper">
+            New shipper
+        </MudButton>
+    </MudStack>
+
+    <MudGrid>
+        @foreach (var shipper in _shippers)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="3">
+                    <MudCardContent>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                            <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Color="Color.Primary" />
+                            <MudText Typo="Typo.h6">@shipper.CompanyName</MudText>
+                        </MudStack>
+
+                        <MudText Typo="Typo.body2" >Shipper ID: @shipper.ShipperID</MudText>
+                        <MudText Typo="Typo.body2" >Phone: @shipper.Phone</MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<ShipperDTO> _shippers = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadShippers();
+    }
+
+    private async Task LoadShippers()
+    {
+        _shippers = await ShippersPageDAL.GetShippersAsync();
+    }
+
+    private async Task AddShipper()
+    {
+        var dialog = await DialogService.ShowAsync<ShipperDialog>("New shipper");
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        await LoadShippers();
+        Snackbar.Add("Shipper created.", MudBlazor.Severity.Success);
+    }
+}

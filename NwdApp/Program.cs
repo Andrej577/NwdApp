@@ -31,6 +31,7 @@ namespace NwdApp
             builder.Services.AddScoped<RegionsDashboardDAL>();
 
             builder.Services.AddScoped<OrdersPageDAL>();
+            builder.Services.AddScoped<ShippersPageDAL>();
 
             builder.Services.AddSignalR();
             builder.Services.AddHostedService<OrderWatcherService>();
